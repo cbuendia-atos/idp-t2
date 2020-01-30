@@ -18,8 +18,8 @@ package eu.seal.idp.core;
 
 import eu.seal.idp.CommonTestSupport;
 import eu.seal.idp.TestConfig;
-import eu.seal.idp.core.CurrentUserHandlerMethodArgumentResolver;
 import eu.seal.idp.model.pojo.CurrentUser;
+import eu.seal.idp.service.impl.CurrentUserHandlerMethodArgumentResolver;
 
 import org.junit.Before;
 import org.junit.Test;

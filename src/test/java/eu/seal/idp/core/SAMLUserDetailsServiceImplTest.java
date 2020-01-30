@@ -18,7 +18,7 @@ package eu.seal.idp.core;
 
 import eu.seal.idp.CommonTestSupport;
 import eu.seal.idp.TestConfig;
-import eu.seal.idp.core.SAMLUserDetailsServiceImpl;
+import eu.seal.idp.service.impl.SAMLUserDetailsServiceImpl;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

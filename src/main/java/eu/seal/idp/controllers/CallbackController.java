@@ -39,17 +39,7 @@ public class CallbackController {
 	public String landing(@CurrentUser User user, Model model) {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		
-		DataSet dataset = new DataSet();
-		System.out.println("This is the new Dataset" + dataset);
-		
-		System.out.println("This is the new user" + user);
-		
-		if (auth == null)
-			LOG.debug("Current authentication instance from security context is null");
-		else
-			LOG.debug("Current authentication instance from security context: "
-					+ this.getClass().getSimpleName());
-		model.addAttribute("username", 	user.getUsername());
+		// Si
 		return "pages/landing"; // Change with the callback 
 	}
 

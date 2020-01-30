@@ -25,7 +25,7 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import eu.seal.idp.core.CurrentUserHandlerMethodArgumentResolver;
+import eu.seal.idp.service.impl.CurrentUserHandlerMethodArgumentResolver;
 
 @Configuration
 public class MvcConfig implements WebMvcConfigurer {

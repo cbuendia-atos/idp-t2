@@ -96,7 +96,7 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
-import eu.seal.idp.core.SAMLUserDetailsServiceImpl;
+import eu.seal.idp.service.impl.SAMLUserDetailsServiceImpl;
  
 @Configuration
 @EnableWebSecurity
