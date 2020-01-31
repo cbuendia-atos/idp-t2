@@ -484,8 +484,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements I
         		.addFilterBefore(samlFilter(), CsrfFilter.class);
         http        
             .authorizeRequests()
-           		.antMatchers("/").permitAll()
+           		.antMatchers("*").permitAll()
            		.antMatchers("/as/*").permitAll()
+           		.antMatchers("/start/**").permitAll()
+           		.antMatchers("/generateToken/**").permitAll()
            		.antMatchers("/saml/**").permitAll()
            		.antMatchers("/css/**").permitAll()
            		.antMatchers("/img/**").permitAll()

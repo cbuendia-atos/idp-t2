@@ -126,6 +126,7 @@ public class NetworkServiceImpl implements NetworkService {
             //only when the request is json encoded are the post params added to the body of the request
             // else they eventually become encoded to the url
             digestBytes = MessageDigest.getInstance("SHA-256").digest("".getBytes());
+            LOG.info("DigestBytes: " + digestBytes);
             addHeaders(headers, host, date, digestBytes, uri, requestId);
 
         } catch (IOException | KeyStoreException | NoSuchAlgorithmException | UnrecoverableKeyException e) {
@@ -139,12 +140,13 @@ public class NetworkServiceImpl implements NetworkService {
                     hostUrl + uri, request, String.class);
             return response.getBody();
         } catch (RestClientException e) {
-            LOG.info("request failed will retry");
+            LOG.error("request failed will retry" + e.getMessage());
             if (attempt < 2) {
                 return sendPostForm(hostUrl, uri,
                         urlParameters, attempt + 1);
             }
         }
+
         return null;
     }
 
