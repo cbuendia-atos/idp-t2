@@ -3,6 +3,7 @@ package eu.seal.idp.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.httpclient.NameValuePair;
 import org.opensaml.saml2.core.Attribute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +46,31 @@ public class SAMLUserDetailsServiceImpl implements SAMLUserDetailsService {
 		
 		datastore.addClearDataItem(dataset);
 		
-		LOG.info(datastore.toString());
+		 
+		 List<NameValuePair> requestParams = new ArrayList<>();
+		 requestParams.clear();
+		 requestParams.add(new NameValuePair("dataObject", "{ 'object': 'hello' }") );
+		 requestParams.add(new NameValuePair("sessionId", ""));
+		 UpdateDataRequest updateReq = new UpdateDataRequest(esmoSessionId, "dsResponse", attributSetString);
+		 resp = mapper.readValue(netServ.sendPostBody(sessionMngrUrl, "/sm/updateSessionData", updateReq, "application/json", 1), SessionMngrResponse.class);
+		 
+		 if (!resp.getCode().toString().equals("OK")) {
+			 LOG.error("ERROR: " + resp.getError());
+			 redirectAttrs.addFlashAttribute("errorMsg", "Error communicating with the ESMO Network");
+			 return "redirect:/authfail";
+		 }
+
+		 // store the ap metadata
+		 requestParams.clear();
+		 if (metadataServ != null && metadataServ.getMetadata() != null) {
+			 updateReq = new UpdateDataRequest(esmoSessionId, "dsMetadata", mapper.writeValueAsString(metadataServ.getMetadata()));
+			 resp = mapper.readValue(netServ.sendPostBody(sessionMngrUrl, "/sm/updateSessionData", updateReq, "application/json", 1), SessionMngrResponse.class);
+			 if (!resp.getCode().toString().equals("OK")) {
+				 LOG.error("ERROR: " + resp.getError());
+				 redirectAttrs.addFlashAttribute("errorMsg", "Error communicating with the ESMO Network");
+				 return "redirect:/authfail";
+			 }
+		 }
 		
 		
 		List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();

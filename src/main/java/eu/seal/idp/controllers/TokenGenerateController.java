@@ -24,6 +24,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
@@ -53,6 +54,7 @@ public class TokenGenerateController {
 	 * Redirects an existing IDP request to the IDP 
 	 */
 	@RequestMapping(value = "/start", method = {RequestMethod.POST, RequestMethod.GET}, produces = "text/plain")
+	@ResponseBody
 	public String startSession() throws KeyStoreException, NoSuchAlgorithmException, IOException {
 		String sessionMngrUrl = System.getenv("SESSION_MANAGER_URL");
 		List<NameValuePair> requestParams = new ArrayList<NameValuePair>();
@@ -62,15 +64,16 @@ public class TokenGenerateController {
 	
 	/**
 	 * Redirects an existing IDP request to the IDP 
-	 */
+	 */	
 	@RequestMapping(value = "/generateToken", method = {RequestMethod.POST, RequestMethod.GET}, produces = "text/plain")
+	@ResponseBody
 	public String generateToken(@RequestParam(value = "session", required = true) String sessionID, @RequestParam(value = "sender", required = true) String sender, @RequestParam(value = "receiver", required = true) String receiver,RedirectAttributes redirectAttrs) throws KeyStoreException, NoSuchAlgorithmException, IOException {
 		String sessionMngrUrl = System.getenv("SESSION_MANAGER_URL");
 		List<NameValuePair> requestParams = new ArrayList<NameValuePair>();
 		requestParams.add(new NameValuePair("sessionId", sessionID));
 		requestParams.add(new NameValuePair("sender", sender));
 		requestParams.add(new NameValuePair("receiver", receiver));
-		String rsp = netServ.sendPostForm(sessionMngrUrl, "/sm/generateToken", requestParams, 1);
+		String rsp = netServ.sendGet(sessionMngrUrl, "/sm/generateToken", requestParams, 1);
 		return rsp;	
 	}
 }

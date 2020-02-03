@@ -63,8 +63,6 @@ public class KeyStoreServiceImpl implements KeyStoreService {
     }
 
     public Key getSigningKey() throws KeyStoreException, NoSuchAlgorithmException, UnrecoverableKeyException, UnsupportedEncodingException {
-        //"jwtkey"
-        //return keystore.getKey(keyAlias, "keypassword".toCharArray());
         String asyncSignature = System.getenv("ASYNC_SIGNATURE");
         if (!org.springframework.util.StringUtils.isEmpty(asyncSignature) && Boolean.valueOf(asyncSignature)) {
             return keystore.getKey(httpSigKeyAlias, keyPass.toCharArray());

@@ -181,11 +181,18 @@ public class NetworkServiceImpl implements NetworkService {
 
             String getURL = StringUtils.isEmpty(url.getQuery())?url.getPath():url.getPath() + "?" + url.getQuery();
             
-            //requestHeaders.add("authorization", sigServ.generateSignature(host, "GET", getURL, null, "application/x-www-form-urlencoded", requestId));
+            requestHeaders.add("authorization", sigServ.generateSignature(host, "GET", getURL, null, "application/x-www-form-urlencoded", requestId));
+        
         } catch (IOException e) {
             LOG.error("could not generate signature!!");
             LOG.error(e.getMessage());
-        }
+        } catch (UnrecoverableKeyException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (KeyStoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
         HttpEntity entity = new HttpEntity(requestHeaders);
         try {
