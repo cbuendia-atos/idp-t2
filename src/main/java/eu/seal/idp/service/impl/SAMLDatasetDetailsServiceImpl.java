@@ -20,18 +20,16 @@ import eu.seal.idp.model.pojo.DataSet;
 import eu.seal.idp.model.pojo.DataStore;
 
 @Service
-public class SAMLUserDetailsServiceImpl implements SAMLUserDetailsService {
+public class SAMLDatasetDetailsServiceImpl {
 	
 	// Logger
-	private static final Logger LOG = LoggerFactory.getLogger(SAMLUserDetailsServiceImpl.class);
+	private static final Logger LOG = LoggerFactory.getLogger(SAMLDatasetDetailsServiceImpl.class);
 	
-	public Object loadUserBySAML(SAMLCredential credential)
+	public DataSet loadDatasetBySAML(String dsId, SAMLCredential credential)
 			throws UsernameNotFoundException {
 		
-		DataStore datastore = new DataStore();
 		DataSet dataset = new DataSet();
-		String userID = credential.getNameID().getValue();
-		dataset.setId(userID);
+		dataset.setId(dsId);
 		List<Attribute> attributesList = credential.getAttributes();
 		
 		for (Attribute att: attributesList) {
@@ -42,17 +40,12 @@ public class SAMLUserDetailsServiceImpl implements SAMLUserDetailsService {
 		}
 		
 		LOG.info(dataset.toString());
-		LOG.info(userID + " is logged in");
-		
-		datastore.addClearDataItem(dataset);
-		
-		
-		List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
-		GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_USER");
-		authorities.add(authority);
-
-		return new User(userID, "", true, true, true, true, authorities);
+		return dataset;
 	}
 
+	public DataSet loadUserBySAML() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	
 }

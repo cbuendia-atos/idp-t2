@@ -16,11 +16,21 @@
 
 package eu.seal.idp.controllers;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.security.Key;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.spec.InvalidKeySpecException;
+import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.httpclient.NameValuePair;
 import org.opensaml.saml2.core.Attribute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
@@ -28,42 +38,75 @@ import org.springframework.security.saml.SAMLCredential;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import eu.seal.idp.model.factories.AttributeTypeFactory;
 import eu.seal.idp.model.pojo.AttributeType;
 import eu.seal.idp.model.pojo.CurrentUser;
 import eu.seal.idp.model.pojo.DataSet;
 import eu.seal.idp.model.pojo.DataStore;
+import eu.seal.idp.service.EsmoMetadataService;
+import eu.seal.idp.service.HttpSignatureService;
+import eu.seal.idp.service.KeyStoreService;
+import eu.seal.idp.service.NetworkService;
+import eu.seal.idp.service.impl.HttpSignatureServiceImpl;
+import eu.seal.idp.service.impl.NetworkServiceImpl;
+import eu.seal.idp.service.impl.SAMLDatasetDetailsServiceImpl;
 
 @Controller
 public class CallbackController {
 	
+	private final NetworkService netServ;
+	private final KeyStoreService keyServ;
 	// Logger
 	private static final Logger LOG = LoggerFactory
 			.getLogger(LandingController.class);
-
+	
+	@Autowired
+	public CallbackController(KeyStoreService keyServ,
+			EsmoMetadataService metadataServ) throws KeyStoreException, NoSuchAlgorithmException, UnrecoverableKeyException, UnsupportedEncodingException, InvalidKeySpecException, IOException {
+		this.keyServ = keyServ;
+		Key signingKey = this.keyServ.getSigningKey();
+		String fingerPrint = this.keyServ.getFingerPrint();
+		HttpSignatureService httpSigServ = new HttpSignatureServiceImpl(fingerPrint, signingKey);
+		this.netServ = new NetworkServiceImpl(httpSigServ);
+	}
+	
+	/**
+	 * Manages SAML success callback (mapped from /saml/SSO callback) and writes to the DataStore
+	 * @param session 
+	 * @param authentication
+	 * @param model
+	 * @param redirectAttrs
+	 * @return 
+	 * @throws IOException
+	 * @throws NoSuchAlgorithmException
+	 * @throws KeyStoreException
+	 */
+	
 	@RequestMapping("/callback")
-	public String landing(@CurrentUser User user, Model model, Authentication authentication) {
-		LOG.info("I'm in the callback");
-		authentication.getDetails();
-		DataStore datastore = new DataStore();
-		DataSet dataset = new DataSet();
-		
-		SAMLCredential credentials = (SAMLCredential) authentication.getCredentials();
-		
-		List<Attribute> attributesList = credentials.getAttributes();
-		
-		for (Attribute att: attributesList) {
-			AttributeType attributeType = new AttributeType();
-			attributeType.setName(att.getName());
-			attributeType.setFriendlyName(att.getFriendlyName());
-			dataset.addAttributesItem(attributeType);
-		}
-		datastore.addClearDataItem(dataset);
-		LOG.info(datastore.toString());
-		
+	public String callback(@RequestParam(value = "session", required = true) String sessionId, Authentication authentication) throws NoSuchAlgorithmException, IOException {
+		authentication.getDetails();	
+		SAMLCredential credentials = (SAMLCredential) authentication.getCredentials();		
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		String sessionMngrUrl = System.getenv("SESSION_MANAGER_URL");
 		
-		// Si
+		// Request Session Data
+		List<NameValuePair> requestParams = new ArrayList<>();
+		requestParams.add(new NameValuePair("sessionId", sessionId));
+		String clearResp = netServ.sendGet(sessionMngrUrl, "/sm/getSessionData",requestParams, 1);
+		
+		// Recover Session ID
+		SessionMngrResponse resp = (new ObjectMapper()).readValue(clearResp, SessionMngrResponse.class);
+		String recoveredSessionID = resp.getSessionData().getSessionId(); 
+		
+		// Generate Datastore
+		DataStore datastore = new DataStore();
+		DataSet dataset = (new SAMLDatasetDetailsServiceImpl()).loadDatasetBySAML(recoveredSessionID, credentials);;
+		LOG.info("This is the dataset after callback" + dataset);
+		
 		return "pages/landing"; // Change with the callback 
 	}
 

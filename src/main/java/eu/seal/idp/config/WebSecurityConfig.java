@@ -304,6 +304,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements I
     public SavedRequestAwareAuthenticationSuccessHandler successRedirectHandler() {
         SavedRequestAwareAuthenticationSuccessHandler successRedirectHandler =
                 new SavedRequestAwareAuthenticationSuccessHandler();
+        successRedirectHandler.setTargetUrlParameter("session");
         successRedirectHandler.setDefaultTargetUrl("/callback");
         return successRedirectHandler;
     }
@@ -487,7 +488,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements I
            		.antMatchers("*").permitAll()
            		.antMatchers("/as/*").permitAll()
            		.antMatchers("/start/**").permitAll()
-           		.antMatchers("/generateToken/**").permitAll()
+           		.antMatchers("/generate/*").permitAll()
            		.antMatchers("/saml/**").permitAll()
            		.antMatchers("/css/**").permitAll()
            		.antMatchers("/img/**").permitAll()
