@@ -39,6 +39,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -47,6 +48,7 @@ import eu.seal.idp.model.pojo.AttributeType;
 import eu.seal.idp.model.pojo.CurrentUser;
 import eu.seal.idp.model.pojo.DataSet;
 import eu.seal.idp.model.pojo.DataStore;
+import eu.seal.idp.model.pojo.SessionMngrResponse;
 import eu.seal.idp.service.EsmoMetadataService;
 import eu.seal.idp.service.HttpSignatureService;
 import eu.seal.idp.service.KeyStoreService;
@@ -62,7 +64,7 @@ public class CallbackController {
 	private final KeyStoreService keyServ;
 	// Logger
 	private static final Logger LOG = LoggerFactory
-			.getLogger(LandingController.class);
+			.getLogger(CallbackController.class);
 	
 	@Autowired
 	public CallbackController(KeyStoreService keyServ,
@@ -87,8 +89,9 @@ public class CallbackController {
 	 */
 	
 	@RequestMapping("/callback")
+	@ResponseBody
 	public String callback(@RequestParam(value = "session", required = true) String sessionId, Authentication authentication) throws NoSuchAlgorithmException, IOException {
-		authentication.getDetails();	
+		authentication.getDetails();
 		SAMLCredential credentials = (SAMLCredential) authentication.getCredentials();		
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		String sessionMngrUrl = System.getenv("SESSION_MANAGER_URL");

@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
+Build-Jdk-Spec: 10
 Implementation-Title: Spring Boot sample SAML 2.0 Service Provider
 Implementation-Version: 2.2.1.RELEASE
-Build-Jdk-Spec: 1.8
-Created-By: Maven Integration for Eclipse
 Main-Class: eu.seal.idp.Application
+Created-By: Maven Integration for Eclipse
 

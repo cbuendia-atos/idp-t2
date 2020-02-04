@@ -42,10 +42,4 @@ public class SAMLDatasetDetailsServiceImpl {
 		LOG.info(dataset.toString());
 		return dataset;
 	}
-
-	public DataSet loadUserBySAML() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
 }

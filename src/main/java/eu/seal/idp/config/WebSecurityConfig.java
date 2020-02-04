@@ -52,6 +52,7 @@ import org.springframework.security.saml.SAMLEntryPoint;
 import org.springframework.security.saml.SAMLLogoutFilter;
 import org.springframework.security.saml.SAMLLogoutProcessingFilter;
 import org.springframework.security.saml.SAMLProcessingFilter;
+import org.springframework.security.saml.SAMLRelayStateSuccessHandler;
 import org.springframework.security.saml.SAMLWebSSOHoKProcessingFilter;
 import org.springframework.security.saml.context.SAMLContextProviderImpl;
 import org.springframework.security.saml.key.JKSKeyManager;
@@ -229,8 +230,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements I
     // Entry point to initialize authentication, default values taken from
     // properties file
     @Bean
-    public SAMLEntryPoint samlEntryPoint() {
-        SAMLEntryPoint samlEntryPoint = new SAMLEntryPoint();
+    public SAMLWithRelayStateEntryPoint samlEntryPoint() {
+    	SAMLWithRelayStateEntryPoint samlEntryPoint = new SAMLWithRelayStateEntryPoint();
         samlEntryPoint.setDefaultProfileOptions(defaultWebSSOProfileOptions());
         return samlEntryPoint;
     }
@@ -244,7 +245,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements I
 	    extendedMetadata.setSignMetadata(true);
 	    extendedMetadata.setEcpEnabled(true);
 	    return extendedMetadata;
-    }
+    }	
     
     // IDP Discovery Service
     @Bean
@@ -301,9 +302,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements I
      
     // Handler deciding where to redirect user after successful login
     @Bean
-    public SavedRequestAwareAuthenticationSuccessHandler successRedirectHandler() {
-        SavedRequestAwareAuthenticationSuccessHandler successRedirectHandler =
-                new SavedRequestAwareAuthenticationSuccessHandler();
+    public SAMLRelayStateSuccessHandler successRedirectHandler() {
+    	SAMLRelayStateSuccessHandler successRedirectHandler =
+                new SAMLRelayStateSuccessHandler();
         successRedirectHandler.setTargetUrlParameter("session");
         successRedirectHandler.setDefaultTargetUrl("/callback");
         return successRedirectHandler;
