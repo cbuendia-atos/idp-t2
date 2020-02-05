@@ -1,8 +1,9 @@
 
 package eu.seal.idp.controllers;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
 
 import eu.seal.idp.model.pojo.SessionMngrResponse;
 import eu.seal.idp.service.EsmoMetadataService;
@@ -28,7 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -39,15 +39,15 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
  *  */
 
 @Controller
-public class ASControllers {
+public class AuthenticateController {
 
-	private final static Logger LOG = LoggerFactory.getLogger(ASControllers.class);
+	private final static Logger LOG = LoggerFactory.getLogger(AuthenticateController.class);
 
 	private final NetworkService netServ;
 	private final KeyStoreService keyServ;
 
 	@Autowired
-	public ASControllers(KeyStoreService keyServ,
+	public AuthenticateController(KeyStoreService keyServ,
 			EsmoMetadataService metadataServ) throws KeyStoreException, NoSuchAlgorithmException, UnrecoverableKeyException, UnsupportedEncodingException, InvalidKeySpecException, IOException {
 		this.keyServ = keyServ;
 		Key signingKey = this.keyServ.getSigningKey();
@@ -55,52 +55,46 @@ public class ASControllers {
 		HttpSignatureService httpSigServ = new HttpSignatureServiceImpl(fingerPrint, signingKey);
 		this.netServ = new NetworkServiceImpl(httpSigServ);
 	}
-	
+
 	/**
 	 * Redirects an existing IDP request to the IDP 
-	 	* @param msToken
-	 	* @param model
-	 	* @param redirectAttrs
-	 	* @return
-	 	* @throws KeyStoreException
+	 * @param msToken
+	 * @param model
+	 * @param redirectAttrs
+	 * @return
+	 * @throws KeyStoreException
+	 * @throws IOException 
+	 * @throws NoSuchAlgorithmException 
+	 * @throws JsonMappingException 
+	 * @throws JsonParseException 
 	 */
 
-		@RequestMapping(value = "/as/authenticate", method = {RequestMethod.POST, RequestMethod.GET})
-		public String authenticate(@RequestParam(value = "msToken", required = false) String msToken, Model model, RedirectAttributes redirectAttrs) throws KeyStoreException {
+	@RequestMapping(value = "/as/authenticate", method = {RequestMethod.POST, RequestMethod.GET})
+	public String authenticate(@RequestParam(value = "msToken", required = true) String msToken, RedirectAttributes redirectAttrs) throws KeyStoreException, JsonParseException, JsonMappingException, NoSuchAlgorithmException, IOException {
 		String sessionMngrUrl = System.getenv("SESSION_MANAGER_URL");
 
 		List<NameValuePair> requestParams = new ArrayList<NameValuePair>();
 		requestParams.add(new NameValuePair("token", msToken));
-		ObjectMapper mapper = new ObjectMapper();    
-		try {
-			SessionMngrResponse resp = mapper.readValue(netServ.sendGet(sessionMngrUrl, "/sm/validateToken", requestParams, 1), SessionMngrResponse.class);
+		ObjectMapper mapper = new ObjectMapper();
+		String rspValidate = netServ.sendGet(sessionMngrUrl, "/sm/validateToken", requestParams, 1);
+		SessionMngrResponse resp = mapper.readValue(rspValidate, SessionMngrResponse.class);
+
 		if (resp.getCode().toString().equals("OK") && StringUtils.isEmpty(resp.getError())) {
 			String sealSessionId = resp.getSessionData().getSessionId();
 			requestParams.clear();
 			requestParams.add(new NameValuePair("sessionId", sealSessionId));
-			Gson gson = new Gson();
-			LinkedHashMap<?, ?> idpRequest = (LinkedHashMap<?, ?>) resp.getSessionData().getSessionVariables().get("apRequest");
-			String jsonApRequest = gson.toJson(idpRequest, LinkedHashMap.class);
-
-
+			LinkedHashMap<?, ?> idpRequest = (LinkedHashMap<?, ?>) resp.getSessionData().getSessionVariables().get("idpRequest");
 			if (idpRequest == null) {
 				LOG.error("no apRequest found in session" + sealSessionId);
-				model.addAttribute("error", "No AP request attributes found in the Session! Please restart the process");
-					redirectAttrs.addFlashAttribute("errorMsg", "No AP request attributes found in the Session! Please restart the process");
-					return "redirect:/authfail";
-				} else {
-					return "redirect:/saml/login?session=" + sealSessionId;
+				return "redirect:/authfail";
+			} else {
+				return "redirect:/saml/login?session=" + sealSessionId;
 			}
 		} else {
-				model.addAttribute("error", "Error validating token! " + resp.getError());
-				LOG.error("something wring with the SM session!" + resp.getError());
-				redirectAttrs.addFlashAttribute("errorMsg", "Error validating token! " + resp.getError());
+			LOG.error("something wring with the SM session!" + resp.getError());
+			redirectAttrs.addFlashAttribute("errorMsg", "Error validating token! " + resp.getError());
 		}
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} 
+
 		return "redirect:/saml/login";
 	}
 }
