@@ -8,29 +8,22 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.apache.commons.httpclient.NameValuePair;
-import org.opensaml.saml2.core.Attribute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.saml.SAMLCredential;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import eu.seal.idp.model.factories.AttributeTypeFactory;
-import eu.seal.idp.model.pojo.AttributeType;
-import eu.seal.idp.model.pojo.CurrentUser;
 import eu.seal.idp.model.pojo.DataSet;
 import eu.seal.idp.model.pojo.DataStore;
 import eu.seal.idp.model.pojo.SessionMngrResponse;
@@ -73,7 +66,7 @@ public class CallbackController {
 	 * @throws KeyStoreException
 	 */
 	
-	@RequestMapping("/callback")
+	@RequestMapping("/as/callback")
 	@ResponseBody
 	public String callback(@RequestParam(value = "session", required = true) String sessionId, Authentication authentication) throws NoSuchAlgorithmException, IOException {
 		authentication.getDetails();
@@ -89,14 +82,13 @@ public class CallbackController {
 		// Recover Session ID
 		SessionMngrResponse smResp = (new ObjectMapper()).readValue(clearSmResp, SessionMngrResponse.class);
 		String recoveredSessionID = smResp.getSessionData().getSessionId(); 
-		
 		// Generate Datastore
 		DataStore datastore = new DataStore();
 		DataSet dataset = (new SAMLDatasetDetailsServiceImpl()).loadDatasetBySAML(recoveredSessionID, credentials);;
 		
 		// Get Callback Address
-		LinkedHashMap<?, ?> idpRequest = (LinkedHashMap<?, ?>) smResp.getSessionData().getSessionVariables().get("clientCallbackAddr");
-		return "redirect:" + idpRequest; // Change with the callback 
+		String callBackAddr = (String) smResp.getSessionData().getSessionVariables().get("clientCallbackAddr");
+		return "redirect:/" + callBackAddr; // Change with the callback 
 	}
 
 }

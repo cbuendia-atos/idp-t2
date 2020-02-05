@@ -113,7 +113,7 @@ public class TokenGenerateController {
 		
 		DataStore datastore = new DataStore();
 		DataSet dataset = new DataSet();
-		
+		String idpRequestPlain = "{\"id\":\"_394a55a94873c15144a62678dafed1573503f4a6ab\",\"type\":\"Request\",\"issuer\":\"https:\\/\\/clave.sir2.rediris.es\\/module.php\\/saml\\/sp\\/saml2-acs.php\\/q2891006e_ea0002678\",\"recipient\":null,\"inResponseTo\":null,\"loa\":null,\"notBefore\":\"2019-12-17T11:50:54Z\",\"notAfter\":\"2020-12-15T11:55:54Z\",\"status\":{\"code\":null,\"subcode\":null,\"message\":null},\"attributes\":[{\"name\":\"https:\\/\\/software.internet2.edu\\/eduperson\\/internet2-mace-dir-eduperson-201602.html#eduPersonTargetedID \",\"friendlyName\":\"eduPersonTargetedID \",\"encoding\":\"UTF-8\",\"isMandatory\":false,\"values\":null},{\"name\":\"https:\\/\\/software.internet2.edu\\/eduperson\\/internet2-mace-dir-eduperson-201602.html#displayName\",\"friendlyName\":\"displayName\",\"encoding\":\"UTF-8\",\"isMandatory\":false,\"values\":null},{\"name\":\"https:\\/\\/software.internet2.edu\\/eduperson\\/internet2-mace-dir-eduperson-201602.html#cn\",\"friendlyName\":\"cn\",\"encoding\":\"UTF-8\",\"isMandatory\":false,\"values\":null},{\"name\":\"https:\\/\\/software.internet2.edu\\/eduperson\\/internet2-mace-dir-eduperson-201602.html#mail\",\"friendlyName\":\"mail\",\"encoding\":\"UTF-8\",\"isMandatory\":false,\"values\":null},{\"name\":\"https:\\/\\/software.internet2.edu\\/eduperson\\/internet2-mace-dir-eduperson-201602.html#eduPersonAffiliation\",\"friendlyName\":\"eduPersonAffiliation\",\"encoding\":\"UTF-8\",\"isMandatory\":false,\"values\":null},{\"name\":\"https:\\/\\/software.internet2.edu\\/eduperson\\/internet2-mace-dir-eduperson-201602.html#eduPersonScopedAffiliation\",\"friendlyName\":\"eduPersonScopedAffiliation\",\"encoding\":\"UTF-8\",\"isMandatory\":false,\"values\":null},{\"name\":\"https:\\/\\/www.terena.org\\/activities\\/tf-emc2\\/docs\\/schac\\/schac-20110705-1.4.1.schema.txt#schacHomeOrganization\",\"friendlyName\":\"schacHomeOrganization\",\"encoding\":\"UTF-8\",\"language\":null,\"isMandatory\":false,\"values\":null},{\"name\":\"https:\\/\\/www.terena.org\\/activities\\/tf-emc2\\/docs\\/schac\\/schac-20110705-1.4.1.schema.txt#schacHomeOrganizationType\",\"friendlyName\":\"schacHomeOrganizationType\",\"encoding\":\"UTF-8\",\"language\":null,\"isMandatory\":false,\"values\":null}],\"properties\":{\"SAML_RelayState\":\"\",\"SAML_RemoteSP_RequestId\":\"_d951f7da6fd1cb7d2de7ab4df483098e\",\"SAML_ForceAuthn\":true,\"SAML_isPassive\":false,\"SAML_NameIDFormat\":\"urn:oasis:names:tc:SAML:2.0:nameid-format:persistent\",\"SAML_AllowCreate\":\"true\"}}";
 		AttributeType[] result = new AttributeType[2];
 		AttributeSetStatus atrSetStatus = new AttributeSetStatus();
 		Map < String, String> metadataProperties = new HashMap();
@@ -126,8 +126,9 @@ public class TokenGenerateController {
 		requestParams.add(new NameValuePair("receiver", receiver));
 		
 		
-		UpdateDataRequest updateReq = new UpdateDataRequest(sessionId, "datastore", attributeSetString);
-		System.out.println("This is the attributeString:  " + attributeSetString);
+		
+		UpdateDataRequest updateReq = new UpdateDataRequest(sessionId, "clientCallbackAddr", "http://https://github.com/EC-SEAL");
+		UpdateDataRequest updateReqIdp = new UpdateDataRequest(sessionId, "idpRequest", idpRequestPlain);
 		String rsp = netServ.sendPostBody(sessionMngrUrl, "/sm/updateSessionData", updateReq, "application/json", 1);
 		return rsp;
 	}

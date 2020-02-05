@@ -1,4 +1,3 @@
-
 package eu.seal.idp.service.impl;
 
 import java.security.Principal;

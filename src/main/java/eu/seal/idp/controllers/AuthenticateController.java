@@ -83,15 +83,19 @@ public class AuthenticateController {
 			String sealSessionId = resp.getSessionData().getSessionId();
 			requestParams.clear();
 			requestParams.add(new NameValuePair("sessionId", sealSessionId));
+			System.out.print("Session ID" + sealSessionId);
+			
 			LinkedHashMap<?, ?> idpRequest = (LinkedHashMap<?, ?>) resp.getSessionData().getSessionVariables().get("idpRequest");
 			if (idpRequest == null) {
-				LOG.error("no apRequest found in session" + sealSessionId);
+				LOG.error("no idpRequest found in session" + sealSessionId);
 				return "redirect:/authfail";
 			} else {
+			
+			System.out.println("SETTING SESSION ID" + sealSessionId);
 				return "redirect:/saml/login?session=" + sealSessionId;
-			}
+			//}
 		} else {
-			LOG.error("something wring with the SM session!" + resp.getError());
+			LOG.error("Something wrong with the SM session: " + resp.getError());
 			redirectAttrs.addFlashAttribute("errorMsg", "Error validating token! " + resp.getError());
 		}
 

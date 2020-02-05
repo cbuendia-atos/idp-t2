@@ -1,7 +1,3 @@
-
-#            - MEMCACHED_HOST=172.19.0.1
-#export =http://localhost
-export MEMCACHED_PORT=11211 
 export ASYNC_SIGNATURE=true
 export URL_ENCODED=true
 export KEY_PASS=selfsignedpass
@@ -31,5 +27,8 @@ export MINEDU_QUERY_BY_AMKA=https://gateway.interoperability.es/academicId/1.0.1
 export MINEDU_TOKEN_URL=https://validation.interoperability.es:9443/OAUTH2Proxy_1.0.0/services/oauthproxy/authorization/token
 export UNIVERSITIES_CONFIG_PATH=/resources/university_codes.json
 export APP_BASE_URL=http://localhost:8080
+export IDP_METADATA_URL=http://localhost:8081/auth/realms/master/protocol/saml/descriptor
+export KEYSTORE_PASS=nalle123
+export KEYSTORE_ID=apollo
 export TESTING=true
 

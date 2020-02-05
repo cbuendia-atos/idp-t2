@@ -195,10 +195,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements I
         DefaultResourceLoader loader = new DefaultResourceLoader();
         Resource storeFile = loader
                 .getResource("classpath:/saml/samlKeystore.jks");
-        String storePass = "nalle123";
+        String storePass = System.getenv("KEYSTORE_PASS");
         Map<String, String> passwords = new HashMap<String, String>();
-        passwords.put("apollo", "nalle123");
-        String defaultKey = "apollo";
+        passwords.put(System.getenv("KEYSTORE_ID"), System.getenv("KEYSTORE_PASS"));
+        String defaultKey = System.getenv("KEYSTORE_ID");
         return new JKSKeyManager(storeFile, storePass, passwords, defaultKey);
     }
     
@@ -222,7 +222,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements I
     @Bean
     public ExtendedMetadata extendedMetadata() {
 	    ExtendedMetadata extendedMetadata = new ExtendedMetadata();
-	    extendedMetadata.setIdpDiscoveryEnabled(true);
+	    extendedMetadata.setIdpDiscoveryEnabled(false);
 	    extendedMetadata.setSigningAlgorithm("http://www.w3.org/2001/04/xmldsig-more#rsa-sha256");
 	    extendedMetadata.setSignMetadata(true);
 	    extendedMetadata.setEcpEnabled(true);
@@ -241,7 +241,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements I
 	@Qualifier("idp-ssocircle")
 	public ExtendedMetadataDelegate ssoCircleExtendedMetadataProvider()
 			throws MetadataProviderException {
-		String idpSSOCircleMetadataURL = "http://localhost:8081/auth/realms/master/protocol/saml/descriptor";
+		String idpSSOCircleMetadataURL = System.getenv("IDP_METADATA_URL");
 		HTTPMetadataProvider httpMetadataProvider = new HTTPMetadataProvider(
 				this.backgroundTaskTimer, httpClient(), idpSSOCircleMetadataURL);
 		httpMetadataProvider.setParserPool(parserPool());
@@ -288,7 +288,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements I
     	SAMLRelayStateSuccessHandler successRedirectHandler =
                 new SAMLRelayStateSuccessHandler();
         successRedirectHandler.setTargetUrlParameter("session");
-        successRedirectHandler.setDefaultTargetUrl("/callback");
+        successRedirectHandler.setDefaultTargetUrl("/as/callback");
         return successRedirectHandler;
     }
     
